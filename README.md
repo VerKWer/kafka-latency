@@ -11,7 +11,7 @@ running.
 3. `gradle build`
 
 ## Run
-First, make sure that Kafka is up and running in the desired configuration. Them, from the `kafka-latency` directory,
+First, make sure that Kafka is up and running in the desired configuration. Then, from the `kafka-latency` directory,
 where you built the project, simply call `java -jar build/libs/kafka-latency.jar`
 
 ## Runtime Parameters
