@@ -11,7 +11,8 @@ running.
 3. `gradle build`
 
 ## Run
-From the `kafka-latency` directory, where you built the project, simply call `java -jar build/libs/kafka-latency.jar`
+First, make sure that Kafka is up and running in the desired configuration. Them, from the `kafka-latency` directory,
+where you built the project, simply call `java -jar build/libs/kafka-latency.jar`
 
 ## Runtime Parameters
 By default, the local hostname is used as the bootstrap server for kafka (with port 9092). If your setup is different
