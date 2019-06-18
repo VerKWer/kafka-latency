@@ -32,7 +32,6 @@ public class LatencyTest {
   
   private String bootstrapServers;
   private final Params params;
-  private static final String topic = "LatencyTestTopic";
   private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
   private final List<Long> times;
   private AdminClient admin;
@@ -67,15 +66,15 @@ public class LatencyTest {
     config.put("bootstrap.servers", bootstrapServers);
     config.put("enable.auto.commit", "false");
     consumer = new KafkaConsumer<>(config, new ByteArrayDeserializer(), new ByteArrayDeserializer());
-    consumer.assign(Collections.singleton(new TopicPartition(topic, 0)));
-    consumer.seekToEnd(Collections.singleton(new TopicPartition(topic, 0)));
+    consumer.assign(Collections.singleton(new TopicPartition(params.topic, 0)));
+    consumer.seekToEnd(Collections.singleton(new TopicPartition(params.topic, 0)));
   }
   
   private int initTopic(int tries) {
     if(tries < 10) {
-      System.out.println("Resetting topic " + topic);
+      System.out.println("Resetting topic " + params.topic);
       try {
-        admin.deleteTopics(Collections.singleton(topic)).all().get();
+        admin.deleteTopics(Collections.singleton(params.topic)).all().get();
       } catch(InterruptedException | ExecutionException e) {
         if(!(e.getCause() instanceof UnknownTopicOrPartitionException))
             e.printStackTrace();
@@ -87,7 +86,7 @@ public class LatencyTest {
       topicConfig.put("retention.ms", "600000");
       topicConfig.put("segment.bytes", "10000000");
       topicConfig.put("segment.ms", "600000");
-      NewTopic nt = new NewTopic(topic, 1, params.replFactor).configs(topicConfig);
+      NewTopic nt = new NewTopic(params.topic, 1, params.replFactor).configs(topicConfig);
       try {
         admin.createTopics(Collections.singleton(nt)).all().get();
       } catch(InterruptedException | ExecutionException e) {
@@ -96,7 +95,8 @@ public class LatencyTest {
       try { Thread.sleep(1000); } catch(InterruptedException e) { }
       try {
         int leaderID =
-            admin.describeTopics(Collections.singleton(topic)).all().get().get(topic).partitions().get(0).leader().id();
+            admin.describeTopics(Collections.singleton(params.topic)).all().get().get(params.topic).partitions().get(0)
+                 .leader().id();
         if((params.forcedLeader == 0 && leaderID == 1) ||
            (params.forcedLeader != 0 && leaderID != params.forcedLeader)) {
           System.out.println("Wrong leader. Retrying...");

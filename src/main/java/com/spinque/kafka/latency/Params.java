@@ -8,18 +8,21 @@ public class Params {
   public final int warmupMsgs;
   public final int cooldownMsgs;
   public final int totalMsgs;
+  public final String topic;
   public final short replFactor;
   public final short forcedLeader;
   public final String output;
   
   
-  public Params(int msgsPerSec, int secs, int msgSize, short replicationFactor, short forcedLeader, String output) {
+  public Params(int msgsPerSec, int secs, int msgSize, String topic, short replicationFactor, short forcedLeader,
+      String output) {
     this.msgsPerSec = msgsPerSec;
     this.msgSize = msgSize;
     msgs = secs * msgsPerSec;
     warmupMsgs = 3 * msgsPerSec;
     cooldownMsgs = msgsPerSec;
     totalMsgs = warmupMsgs + msgs + cooldownMsgs;
+    this.topic = topic;
     this.replFactor = replicationFactor;
     this.forcedLeader = forcedLeader;
     this.output = output;
@@ -30,6 +33,7 @@ public class Params {
     int msgsPerSec = 200;
     int secs = 10;
     int msgSize = 100;
+    String topic = "LatencyTestTopic";
     short replicationFactor = 1;
     short forcedLeader = 0;
     String output = null;
@@ -41,6 +45,8 @@ public class Params {
         secs = Integer.parseInt(arg.substring(0, arg.length() - 1));
       else if(arg.endsWith("B"))
         msgSize = Integer.parseInt(arg.substring(0, arg.length() - 1));
+      else if(arg.startsWith("topic="))
+        topic = arg.substring(6, arg.length());
       else if(arg.startsWith("rf="))
         replicationFactor = Short.parseShort(arg.substring(3, arg.length()));
       else if(arg.startsWith("lead="))
@@ -51,7 +57,7 @@ public class Params {
         System.err.println("Unknown argument: " + arg);
     }
     
-    return new Params(msgsPerSec, secs, msgSize, replicationFactor, forcedLeader, output);
+    return new Params(msgsPerSec, secs, msgSize, topic, replicationFactor, forcedLeader, output);
   }
   
 }
