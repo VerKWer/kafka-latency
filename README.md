@@ -12,11 +12,11 @@ running.
 
 ## Run
 First, make sure that Kafka is up and running in the desired configuration. Then, from the `kafka-latency` directory,
-where you built the project, simply call `java -jar build/libs/kafka-latency.jar`
+where you built the project, simply call `java -jar build/libs/kafka-latency.jar`.
 
 ## Runtime Parameters
 By default, the local hostname is used as the bootstrap server for kafka (with port 9092). If your setup is different
-(e.g. if you're running the latency test on a machine that is not part of the Kafka cluster), then simply call  
+(e.g. if you're running the latency test on a machine that is not part of the Kafka cluster), then set  
 `export KAFKA_BOOTSTRAP_SERVERS=...`  
 before running the jar-file. The value of this variable is a comma-separated list of bootstrap servers plus port for
 Kafka. So, for example,  
