@@ -16,6 +16,18 @@ public class Params {
   
   public Params(int msgsPerSec, int secs, int msgSize, String topic, short replicationFactor, short forcedLeader,
       String output) {
+    if(msgsPerSec < 1)
+      throw new RuntimeException("Illegal parameter: " + msgsPerSec + "/s");
+    else if(secs < 1)
+      throw new RuntimeException("Illegal parameter: " + secs + "s");
+    else if(msgSize < 8)
+      throw new RuntimeException("Illegal parameter: " + msgSize + "B");
+    else if(topic.isEmpty())
+      throw new RuntimeException("Topic name cannot be empty");
+    else if(replicationFactor < 1)
+      throw new RuntimeException("Illegal parameter: rf=" + replicationFactor);
+    else if(forcedLeader < 0)
+      throw new RuntimeException("Illegal parameter: lead=" + forcedLeader);
     this.msgsPerSec = msgsPerSec;
     this.msgSize = msgSize;
     msgs = secs * msgsPerSec;

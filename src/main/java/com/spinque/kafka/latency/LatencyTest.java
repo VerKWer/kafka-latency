@@ -44,9 +44,11 @@ public class LatencyTest {
     this.params = params;
     times = new ArrayList<>(params.msgs);
     topicConfig.put("message.timestamp.type", "CreateTime");
-    topicConfig.put("retention.bytes", String.valueOf(params.totalMsgs * params.msgSize * 2));
+    topicConfig.put("retention.bytes",
+        String.valueOf(Math.min((long)params.totalMsgs * params.msgSize * 2, Integer.MAX_VALUE)));
     topicConfig.put("retention.ms", String.valueOf(params.totalMsgs/params.msgsPerSec * 2000));
-    topicConfig.put("segment.bytes", String.valueOf(params.totalMsgs * params.msgSize * 2));
+    topicConfig.put("segment.bytes",
+        String.valueOf(Math.min((long)params.totalMsgs * params.msgSize * 2, Integer.MAX_VALUE)));
     topicConfig.put("segment.ms", String.valueOf(params.totalMsgs/params.msgsPerSec * 2000));
   }
   
@@ -115,7 +117,6 @@ public class LatencyTest {
   private void initProducer() {
     Properties config = new Properties();
     config.put("bootstrap.servers", bootstrapServers);
-    //config.put("batch.size", "0");
     config.put("acks", "0");
     producer = new KafkaProducer<>(config, new ByteArraySerializer(), new ByteArraySerializer());
   }
@@ -154,7 +155,7 @@ public class LatencyTest {
     if(sent <= params.totalMsgs) {
       if(sent == 1)
         System.out.println("Warming up...");
-      byte[] payload = new byte[Math.max(8, params.msgSize)];
+      byte[] payload = new byte[params.msgSize];
       long now = System.nanoTime();
       byte[] nowBytes = Utils.longToBytes(now);
       for(int i = 0; i < 8; ++i)
