@@ -43,7 +43,6 @@ public class LatencyTest {
   public LatencyTest(Params params) {
     this.params = params;
     times = new ArrayList<>(params.msgs);
-    topicConfig.put("message.timestamp.type", "CreateTime");
     topicConfig.put("retention.bytes",
         String.valueOf(Math.min((long)params.totalMsgs * params.msgSize * 2, Integer.MAX_VALUE)));
     topicConfig.put("retention.ms", String.valueOf(params.totalMsgs/params.msgsPerSec * 2000));
