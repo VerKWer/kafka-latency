@@ -82,7 +82,8 @@ public class LatencyTest {
       try {
         admin.deleteTopics(Collections.singleton(params.topic)).all().get();
       } catch(InterruptedException | ExecutionException e) {
-        if(!(e.getCause() instanceof UnknownTopicOrPartitionException)) e.printStackTrace();
+        if(!(e.getCause() instanceof UnknownTopicOrPartitionException))
+          throw new RuntimeException(e);
       }
       try { Thread.sleep(1000); } catch(InterruptedException e) { }
       NewTopic nt = new NewTopic(params.topic, 1, params.replFactor).configs(topicConfig);
@@ -104,12 +105,10 @@ public class LatencyTest {
           return leaderID;
         }
       } catch(InterruptedException | ExecutionException e) {
-        e.printStackTrace();
+        throw new RuntimeException(e);
       }
-      return 0;
     } else {
-      System.err.println("Didn't succeed in forcing leader after 10 tries. Giving up!");
-      return 0;
+      throw new RuntimeException("Didn't succeed in forcing leader after 10 tries. Giving up!");
     }
   }
   
@@ -181,7 +180,6 @@ public class LatencyTest {
     lt.initAdmin();
     int leaderID = lt.initTopic(0);
     lt.admin.close();
-    if(leaderID == 0) return;
     lt.initConsumer();
     lt.initProducer();
     lt.consumerThread.start();

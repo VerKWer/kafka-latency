@@ -64,6 +64,7 @@ public class Eval {
         writer.write("set encoding utf8\n");
         writer.write("set xrange [0:" + times.size() + "]\n");
         writer.write("set yrange [0:" + (max + max/20) + "]\n");
+        writer.write("set ylabel \"Latency (μs)\"\n");
         writer.write("unset xtics\n");
         writer.write("set grid\n");
         writer.write("set multiplot layout 1, 2\n");
@@ -82,6 +83,7 @@ public class Eval {
       writer.write("set terminal x11 size 1500, 700\n");
       writer.write("set xrange [0:" + times.size() + "]\n");
       writer.write("set yrange [0:" + (max + max/20) + "]\n");
+      writer.write("set ylabel \"Latency (us)\"\n");
       writer.write("unset xtics\n");
       writer.write("set grid\n");
       writer.write("set multiplot layout 1, 2\n");
