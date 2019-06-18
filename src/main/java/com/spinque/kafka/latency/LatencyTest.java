@@ -162,7 +162,7 @@ public class LatencyTest {
       for(int i = 0; i < 8; ++i)
         payload[i] = nowBytes[i];
       
-      ProducerRecord<byte[], byte[]> record = new ProducerRecord<>("LatencyTestTopic", payload);
+      ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(params.topic, payload);
       producer.send(record);
       if(sent == params.warmupMsgs)
         System.out.println("Warmup done! Timing...");
