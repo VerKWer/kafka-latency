@@ -32,6 +32,7 @@ public class LatencyTest {
   
   private String bootstrapServers;
   private final Params params;
+  private final Map<String, String> topicConfig = new HashMap<>();
   private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
   private final List<Long> times;
   private AdminClient admin;
@@ -42,6 +43,11 @@ public class LatencyTest {
   public LatencyTest(Params params) {
     this.params = params;
     times = new ArrayList<>(params.msgs);
+    topicConfig.put("message.timestamp.type", "CreateTime");
+    topicConfig.put("retention.bytes", String.valueOf(params.totalMsgs * params.msgSize * 2));
+    topicConfig.put("retention.ms", String.valueOf(params.totalMsgs/params.msgsPerSec * 2000));
+    topicConfig.put("segment.bytes", String.valueOf(params.totalMsgs * params.msgSize * 2));
+    topicConfig.put("segment.ms", String.valueOf(params.totalMsgs/params.msgsPerSec * 2000));
   }
   
   
@@ -76,16 +82,9 @@ public class LatencyTest {
       try {
         admin.deleteTopics(Collections.singleton(params.topic)).all().get();
       } catch(InterruptedException | ExecutionException e) {
-        if(!(e.getCause() instanceof UnknownTopicOrPartitionException))
-            e.printStackTrace();
+        if(!(e.getCause() instanceof UnknownTopicOrPartitionException)) e.printStackTrace();
       }
       try { Thread.sleep(1000); } catch(InterruptedException e) { }
-      Map<String, String> topicConfig = new HashMap<>();
-      topicConfig.put("message.timestamp.type", "CreateTime");
-      topicConfig.put("retention.bytes", "10000000");
-      topicConfig.put("retention.ms", "600000");
-      topicConfig.put("segment.bytes", "10000000");
-      topicConfig.put("segment.ms", "600000");
       NewTopic nt = new NewTopic(params.topic, 1, params.replFactor).configs(topicConfig);
       try {
         admin.createTopics(Collections.singleton(nt)).all().get();
