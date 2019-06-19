@@ -57,7 +57,9 @@ public class LatencyTest {
     if(bootstrap == null)
       try {
         bootstrap = InetAddress.getLocalHost().getHostName() + ":9092";
-      } catch(UnknownHostException e1) { }
+      } catch(UnknownHostException e1) {
+        bootstrap = "localhost:9092";
+      }
     bootstrapServers = bootstrap;
   }
   
