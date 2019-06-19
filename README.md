@@ -25,8 +25,8 @@ would be valid.
 
 Also by default, the latency test runs for approximately 10 seconds at 200 messages per second, each of size 100B and
 these are posted to a topic called "`LatencyTestTopic`" with a replication factor of 1. Moreover, we always try to force
-the topic leader to not be broker number 1 (we assume that the benchmark runs on the same machine that is also broker
-number 1). All these things can be manually specified as command line parameters. Say we would like to run a latency
+the topic leader to not be broker number 0 (we assume that the benchmark runs on the same machine that is also broker
+number 0). All these things can be manually specified as command line parameters. Say we would like to run a latency
 test for 7 seconds at 500 messages per second of size 200B each that are posted to the topic "`Test`" with a replication
 factor of 3 and where we try to force broker number 2 to be the leader. For this, we would call  
 `java -jar build/libs/kafka-latency.jar 7s 500/s 200B topic=Test rf=3 lead=2`.
