@@ -29,7 +29,7 @@ public class Params {
     this.msgsPerSec = msgsPerSec;
     this.msgSize = msgSize;
     msgs = secs * msgsPerSec;
-    warmupMsgs = 3 * msgsPerSec;
+    warmupMsgs = 5 * msgsPerSec;
     cooldownMsgs = msgsPerSec;
     totalMsgs = warmupMsgs + msgs + cooldownMsgs;
     this.topic = topic;
