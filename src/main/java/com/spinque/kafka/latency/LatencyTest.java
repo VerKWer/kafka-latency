@@ -1,5 +1,6 @@
 package com.spinque.kafka.latency;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
@@ -34,7 +35,9 @@ public class LatencyTest {
   private final Params params;
   private final Map<String, String> topicConfig = new HashMap<>();
   private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
-  private final List<Long> times;
+  private final List<Long> sendTimes;
+  private final List<Long> latencies;
+  private final byte[] payload;  // so we don't always have to reallocate a new array of zeroes
   private AdminClient admin;
   private volatile KafkaConsumer<byte[], byte[]> consumer;
   private KafkaProducer<byte[], byte[]> producer;
@@ -42,13 +45,16 @@ public class LatencyTest {
   
   public LatencyTest(Params params) {
     this.params = params;
-    times = new ArrayList<>(params.msgs);
+    sendTimes = new ArrayList<>(params.msgs);
+    latencies = new ArrayList<>(params.msgs);
+    topicConfig.put("message.timestamp.type", "CreateTime");
     topicConfig.put("retention.bytes",
         String.valueOf(Math.min((long)params.totalMsgs * params.msgSize * 2, Integer.MAX_VALUE)));
     topicConfig.put("retention.ms", String.valueOf(params.totalMsgs/params.msgsPerSec * 2000));
     topicConfig.put("segment.bytes",
         String.valueOf(Math.min((long)params.totalMsgs * params.msgSize * 2, Integer.MAX_VALUE)));
     topicConfig.put("segment.ms", String.valueOf(params.totalMsgs/params.msgsPerSec * 2000));
+    payload = new byte[params.msgSize];
   }
   
   
@@ -135,7 +141,8 @@ public class LatencyTest {
             for(ConsumerRecord<byte[], byte[]> record : records) {
               if(noMsgs >= params.warmupMsgs && noMsgs < params.warmupMsgs + params.msgs) {
                 long diff = now - Utils.bytesToLong(record.value());
-                times.add(diff);
+                sendTimes.add(record.timestamp());
+                latencies.add(diff);
               }
               ++noMsgs;
             }
@@ -152,24 +159,23 @@ public class LatencyTest {
   });
   
   private void sendMsg(AtomicInteger msgsSent) {
-    int sent = msgsSent.incrementAndGet();
-    if(sent <= params.totalMsgs) {
-      if(sent == 1)
-        System.out.println("Warming up...");
-      byte[] payload = new byte[params.msgSize];
+    int sent = msgsSent.getAndIncrement();
+    if(sent < params.totalMsgs) {
       long now = System.nanoTime();
       byte[] nowBytes = Utils.longToBytes(now);
       for(int i = 0; i < 8; ++i)
         payload[i] = nowBytes[i];
-      
       ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(params.topic, payload);
-      producer.send(record);
-      if(sent == params.warmupMsgs)
-        System.out.println("Warmup done! Timing...");
+      
+      if(sent == 0)
+        System.out.println("Warming up...");
+      else if(sent == params.warmupMsgs)
+          System.out.println("Warmup done! Timing...");
       else if(sent == params.warmupMsgs + params.msgs)
         System.out.println("Timing done! Cooling down...");
       else if(sent == params.totalMsgs)
         System.out.println("All messages sent!");
+      producer.send(record);
     }
   }
   
@@ -194,10 +200,14 @@ public class LatencyTest {
     lt.executor.shutdownNow();
     lt.producer.close();
     System.out.println("Evaluating results...\n");
-    String legend = Eval.evalTimes(leaderID, params, lt.times);
+    String legend = Eval.evalTimes(leaderID, params, lt.latencies);
     System.out.println(legend);
-    Eval.plot(legend, lt.times, params.output);
-    
+    try {
+      Eval.plot(legend, lt.sendTimes, lt.latencies, params.output);
+    } catch(IOException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
 
 }

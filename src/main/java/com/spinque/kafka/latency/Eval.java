@@ -31,23 +31,27 @@ public class Eval {
     return sb.toString();
   }
   
-  public static void plot(String legend, List<Long> times, String output) {
+  public static void plot(String legend, List<Long> sendTimes, List<Long> latencies, String output) throws IOException {
     try {
       File tmpFile = File.createTempFile("kafkaLatencyTest", ".data");
       tmpFile.deleteOnExit();
       BufferedWriter writer = new BufferedWriter(new FileWriter(tmpFile));
-      for(long time : times) {
-        writer.write(String.valueOf(time/1000));
+      for(int i = 0; i < latencies.size(); ++i) {
+        long sendTime = sendTimes.get(i) - sendTimes.get(0);
+        long latency = latencies.get(i);
+        writer.write(String.valueOf(sendTime));
+        writer.write(" ");
+        writer.write(String.valueOf(latency/1000));
         writer.newLine();
       }
       writer.close();
       
-      Collections.sort(times);
+      Collections.sort(latencies);
       File tmpFile2 = File.createTempFile("kafkaLatencyTestSorted", ".data");
       tmpFile2.deleteOnExit();
       writer = new BufferedWriter(new FileWriter(tmpFile2));
-      for(long time : times) {
-        writer.write(String.valueOf(time/1000));
+      for(long latency : latencies) {
+        writer.write(String.valueOf(latency/1000));
         writer.newLine();
       }
       writer.close();
@@ -55,25 +59,26 @@ public class Eval {
       legend = legend.replaceAll("\n", "\\\\n");
       File gpFile = File.createTempFile("kafkaLatencyTest", ".gp");
       gpFile.deleteOnExit();
-      long max = times.get(times.size() - 1)/1000;
+      long max = latencies.get(latencies.size() - 1)/1000;
       
       if(output != null) {
         writer = new BufferedWriter(new FileWriter(gpFile));
         writer.write("set terminal png size 1500, 700\n");
         writer.write("set output \"" + output + "\"\n");
         writer.write("set encoding utf8\n");
-        writer.write("set xrange [0:" + times.size() + "]\n");
         writer.write("set yrange [0:" + (max + max/20) + "]\n");
         writer.write("set ylabel \"Latency (μs)\"\n");
-        writer.write("unset xtics\n");
         writer.write("set grid\n");
-        writer.write("set multiplot layout 1, 2\n");
+        writer.write("set multiplot layout 1,2 margins .05,.95,.05,.95 spacing .05\n");
         writer.write("set title \"Chronological\" font \",14\"\n");
+        writer.write("set xlabel \"Time (ms)\"\n");
         writer.write("plot \"" + tmpFile.getAbsolutePath() + "\" with lines notitle\n");
         writer.write("set title \"Sorted\" font \",14\"\n");
         writer.write("set label \"");
         writer.write(legend);
-        writer.write("\" at " + times.size()/20 + ", " + max + "\n");
+        writer.write("\" at " + latencies.size()/20 + ", " + max + "\n");
+        writer.write("unset xtics\n");
+        writer.write("unset xlabel\n");
         writer.write("plot \"" + tmpFile2.getAbsolutePath() + "\" with lines notitle\n");
         writer.close();
         Runtime.getRuntime().exec(new String[] { "gnuplot", gpFile.getAbsolutePath() }).waitFor();
@@ -81,23 +86,24 @@ public class Eval {
 
       writer = new BufferedWriter(new FileWriter(gpFile));
       writer.write("set terminal x11 size 1500, 700\n");
-      writer.write("set xrange [0:" + times.size() + "]\n");
       writer.write("set yrange [0:" + (max + max/20) + "]\n");
       writer.write("set ylabel \"Latency (us)\"\n");
-      writer.write("unset xtics\n");
       writer.write("set grid\n");
-      writer.write("set multiplot layout 1, 2\n");
+      writer.write("set multiplot layout 1,2 margins .05,.95,.05,.95 spacing .05\n");
       writer.write("set title \"Chronological\" font \",14\"\n");
+      writer.write("set xlabel \"Time (ms)\"\n");
       writer.write("plot \"" + tmpFile.getAbsolutePath() + "\" with lines notitle\n");
       writer.write("set title \"Sorted\" font \",14\"\n");
       writer.write("set label \"");
       writer.write(legend.replaceAll("μ", "u"));
-      writer.write("\" at " + times.size()/20 + ", " + max + "\n");
+      writer.write("\" at " + latencies.size()/20 + ", " + max + "\n");
+      writer.write("unset xtics\n");
+      writer.write("unset xlabel\n");
       writer.write("plot \"" + tmpFile2.getAbsolutePath() + "\" with lines notitle\n");
       writer.close();
       // Note: Need .waitFor() because otherwise, the temporary files will be deleted too quickly.
       Runtime.getRuntime().exec(new String[] { "gnuplot",  "-p", gpFile.getAbsolutePath() }).waitFor();
-    } catch(IOException | InterruptedException e) { e.printStackTrace(); }
+    } catch(InterruptedException e) { }
   }
   
 }
