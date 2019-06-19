@@ -91,7 +91,7 @@ public class LatencyTest {
       try {
         admin.createTopics(Collections.singleton(nt)).all().get();
       } catch(InterruptedException | ExecutionException e) {
-        e.printStackTrace();
+        throw new RuntimeException("Couldn't create topic " + params.topic, e);
       }
       try { Thread.sleep(1000); } catch(InterruptedException e) { }
       try {
