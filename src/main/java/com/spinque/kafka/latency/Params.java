@@ -66,7 +66,7 @@ public class Params {
       else if(arg.endsWith(".png"))
         output = arg;
       else
-        System.err.println("Unknown argument: " + arg);
+        throw new RuntimeException("Unknown argument: " + arg);
     }
     
     return new Params(msgsPerSec, secs, msgSize, topic, replicationFactor, forcedLeader, output);
