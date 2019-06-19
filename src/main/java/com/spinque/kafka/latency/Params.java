@@ -26,8 +26,6 @@ public class Params {
       throw new RuntimeException("Topic name cannot be empty");
     else if(replicationFactor < 1)
       throw new RuntimeException("Illegal parameter: rf=" + replicationFactor);
-    else if(forcedLeader < 0)
-      throw new RuntimeException("Illegal parameter: lead=" + forcedLeader);
     this.msgsPerSec = msgsPerSec;
     this.msgSize = msgSize;
     msgs = secs * msgsPerSec;
@@ -61,8 +59,11 @@ public class Params {
         topic = arg.substring(6, arg.length());
       else if(arg.startsWith("rf="))
         replicationFactor = Short.parseShort(arg.substring(3, arg.length()));
-      else if(arg.startsWith("lead="))
+      else if(arg.startsWith("lead=")) {
+        if(forcedLeader < 0)
+          throw new RuntimeException("Illegal parameter: lead=" + forcedLeader);
         forcedLeader = Short.parseShort(arg.substring(5, arg.length()));
+      }
       else if(arg.endsWith(".png"))
         output = arg;
       else

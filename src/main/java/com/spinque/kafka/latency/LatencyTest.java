@@ -98,8 +98,8 @@ public class LatencyTest {
         int leaderID =
             admin.describeTopics(Collections.singleton(params.topic)).all().get().get(params.topic).partitions().get(0)
                  .leader().id();
-        if((params.forcedLeader == 0 && leaderID == 1) ||
-           (params.forcedLeader != 0 && leaderID != params.forcedLeader)) {
+        if((params.forcedLeader < 0 && leaderID == 1) ||
+           (params.forcedLeader >= 0 && leaderID != params.forcedLeader)) {
           System.out.println("Wrong leader. Retrying...");
           return initTopic(tries + 1);
         } else {
