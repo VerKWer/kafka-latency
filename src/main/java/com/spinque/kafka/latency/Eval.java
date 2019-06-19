@@ -69,7 +69,7 @@ public class Eval {
         writer.write("set yrange [0:" + (max + max/20) + "]\n");
         writer.write("set ylabel \"Latency (μs)\"\n");
         writer.write("set grid\n");
-        writer.write("set multiplot layout 1,2 margins .05,.95,.05,.95 spacing .05\n");
+        writer.write("set multiplot layout 1,2 margins .08,.97,.1,.91 spacing .08\n");
         writer.write("set title \"Chronological\" font \",14\"\n");
         writer.write("set xlabel \"Time (ms)\"\n");
         writer.write("plot \"" + tmpFile.getAbsolutePath() + "\" with lines notitle\n");
@@ -89,7 +89,7 @@ public class Eval {
       writer.write("set yrange [0:" + (max + max/20) + "]\n");
       writer.write("set ylabel \"Latency (us)\"\n");
       writer.write("set grid\n");
-      writer.write("set multiplot layout 1,2 margins .05,.95,.05,.95 spacing .05\n");
+      writer.write("set multiplot layout 1,2 margins .08,.97,.1,.91 spacing .08\n");
       writer.write("set title \"Chronological\" font \",14\"\n");
       writer.write("set xlabel \"Time (ms)\"\n");
       writer.write("plot \"" + tmpFile.getAbsolutePath() + "\" with lines notitle\n");
